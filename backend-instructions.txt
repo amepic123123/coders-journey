@@ -1,0 +1,186 @@
+==============================================================================
+PROJECT: CODERS' JOURNEY (Backend Instructions)
+==============================================================================
+
+Hey! The Frontend (HTML/CSS) is completely finished. I have converted all HTML
+files to .php and added "Mock Data" blocks at the top of them so I could
+design them.
+
+YOUR JOB:
+1. Create the Database.
+2. Connect the Database (`config/db.php`).
+3. Create the Logic Files in the `/actions` folder.
+4. Go into my .php files, DELETE the "Mock Data" blocks, and LINK your logic.
+
+------------------------------------------------------------------------------
+STEP 1: FOLDER STRUCTURE
+------------------------------------------------------------------------------
+Ensure your local folder looks EXACTLY like this so my links work:
+
+/coders-journey
+├── /assets            (Done - Do not touch)
+├── /config            (Create db.php here)
+├── /actions           (YOU WORK HERE - Create all logic files here)
+├── /includes          (Optional - If you want to extract header/navbar)
+├── index.php
+├── login.php
+├── register.php
+├── verify.php
+├── ask.php
+├── question.php
+├── roadmaps.php
+├── roadmap_view.php
+├── profile.php
+└── logout.php
+
+------------------------------------------------------------------------------
+STEP 2: DATABASE SETUP (Run this SQL in phpMyAdmin/DataGrip)
+------------------------------------------------------------------------------
+Database Name: coders_journey
+
+CREATE TABLE users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    role ENUM('user', 'verified', 'admin') DEFAULT 'user',
+    reputation INT DEFAULT 0,
+    is_email_verified TINYINT DEFAULT 0,
+    verification_code VARCHAR(6),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE questions (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT,
+    title VARCHAR(255) NOT NULL,
+    description TEXT NOT NULL,
+    tags VARCHAR(255),
+    view_count INT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE answers (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    question_id INT,
+    user_id INT,
+    body TEXT NOT NULL,
+    is_best TINYINT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (question_id) REFERENCES questions(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE roadmaps (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    creator_id INT,
+    title VARCHAR(100) NOT NULL,
+    description TEXT,
+    difficulty ENUM('Beginner','Intermediate','Advanced') DEFAULT 'Beginner',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (creator_id) REFERENCES users(id)
+);
+
+CREATE TABLE roadmap_steps (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    roadmap_id INT,
+    step_order INT,
+    title VARCHAR(100),
+    description TEXT,
+    FOREIGN KEY (roadmap_id) REFERENCES roadmaps(id)
+);
+
+CREATE TABLE user_roadmap_progress (
+    user_id INT,
+    step_id INT,
+    is_completed TINYINT DEFAULT 1,
+    PRIMARY KEY (user_id, step_id),
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (step_id) REFERENCES roadmap_steps(id)
+);
+
+------------------------------------------------------------------------------
+STEP 3: CONFIGURATION
+------------------------------------------------------------------------------
+Create file: `config/db.php`
+
+<?php
+$host = 'localhost';
+$dbname = 'coders_journey';
+$user = 'root';
+$pass = ''; // Default XAMPP password
+
+try {
+    $pdo = new PDO("mysql:host=$host;dbname=$dbname", $user, $pass);
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+} catch(PDOException $e) {
+    die("DB Connection Failed: " . $e->getMessage());
+}
+?>
+
+------------------------------------------------------------------------------
+STEP 4: ACTION FILES YOU NEED TO CREATE (In /actions folder)
+------------------------------------------------------------------------------
+
+1. actions/register_logic.php
+   - INPUTS: $_POST['username'], $_POST['email'], $_POST['password']
+   - LOGIC:
+     * Check if email exists.
+     * Hash password using `password_hash()`.
+     * Generate 6-digit OTP.
+     * Insert into `users`.
+     * Send email (optional) or just display code for testing.
+     * Redirect: `header("Location: ../verify.php?email=$email");`
+
+2. actions/verify_logic.php
+   - INPUTS: $_POST['email'], $_POST['otp_code']
+   - LOGIC:
+     * Check if code matches DB.
+     * If yes: Update `is_email_verified = 1`, set `$_SESSION['user_id']`.
+     * Redirect: `header("Location: ../index.php");`
+
+3. actions/login_logic.php
+   - INPUTS: $_POST['email'], $_POST['password']
+   - LOGIC:
+     * Fetch user.
+     * Verify hash: `password_verify()`.
+     * Set `$_SESSION['user_id']` and `$_SESSION['username']`.
+     * Redirect: `header("Location: ../index.php");`
+
+4. actions/ask_logic.php
+   - INPUTS: $_POST['q_title'], $_POST['q_desc'], $_POST['q_tags']
+   - LOGIC: Insert into `questions`. Redirect to `index.php`.
+
+5. actions/fetch_questions.php  (USED IN index.php)
+   - LOGIC: Query `SELECT * FROM questions ORDER BY created_at DESC`.
+   - OUTPUT: Create a variable named `$questions` (Array of arrays).
+   - NOTE: This file is NOT a redirect. It is `required` at the top of index.php.
+
+6. actions/fetch_single_question.php (USED IN question.php)
+   - INPUT: `$_GET['id']`
+   - OUTPUT:
+     * Variable `$question` (Single row).
+     * Variable `$answers` (Array of rows).
+
+7. actions/post_answer.php
+   - INPUTS: $_POST['question_id'], $_POST['answer_body']
+   - LOGIC: Insert into `answers`. Redirect back to `../question.php?id=$id`.
+
+8. actions/fetch_roadmaps.php (USED IN roadmaps.php)
+   - OUTPUT: Variable `$roadmaps`.
+
+9. actions/fetch_roadmap_details.php (USED IN roadmap_view.php)
+   - INPUT: `$_GET['id']`
+   - OUTPUT: Variable `$roadmap` and `$steps`.
+   - IMPORTANT: You must LEFT JOIN `user_roadmap_progress` to see if a step is checked.
+
+------------------------------------------------------------------------------
+STEP 5: INTEGRATION
+------------------------------------------------------------------------------
+Once you create the logic files above:
+1. Open my Frontend files (e.g., `index.php`).
+2. DELETE the "Temporary Mock Data" block at the top.
+3. Uncomment the line: `require 'actions/fetch_questions.php';`
+
+خليت عمك gemini يسوي الفايل هاض كامل عشانه معي بالشغل أول بأول

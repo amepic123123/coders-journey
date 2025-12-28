@@ -1,0 +1,398 @@
+/* =========================================
+   1. GLOBAL VARIABLES & RESET
+   ========================================= */
+:root {
+    --primary: #4a90e2;       /* Tech Blue */
+    --primary-dark: #357abd;
+    --secondary: #2c3e50;     /* Dark Navy */
+    --success: #27ae60;       /* Green */
+    --danger: #e74c3c;        /* Red */
+    --bg-body: #f4f6f7;       /* Light Grey Background */
+    --bg-card: #ffffff;
+    --text-main: #2c3e50;
+    --text-muted: #7f8c8d;
+    --border: #e1e4e8;
+    --shadow: 0 2px 4px rgba(0,0,0,0.05);
+    --radius: 8px;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    background-color: var(--bg-body);
+    color: var(--text-main);
+    line-height: 1.6;
+    font-size: 16px;
+}
+
+a {
+    text-decoration: none;
+    color: var(--primary);
+    transition: color 0.2s;
+}
+
+a:hover {
+    color: var(--primary-dark);
+}
+
+ul {
+    list-style: none;
+}
+
+/* =========================================
+   2. NAVBAR
+   ========================================= */
+.navbar {
+    background-color: var(--secondary);
+    color: white;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 2rem;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.nav-brand a {
+    color: white;
+    font-size: 1.5rem;
+    font-weight: bold;
+    letter-spacing: 1px;
+}
+
+.nav-links a {
+    color: #bdc3c7;
+    margin: 0 15px;
+    font-weight: 500;
+}
+
+.nav-links a:hover,
+.nav-links a.active {
+    color: white;
+}
+
+.nav-auth {
+    display: flex;
+    align-items: center;
+}
+
+/* =========================================
+   3. LAYOUT & GRID SYSTEM
+   ========================================= */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Three Column Layout: Sidebar (220px) | Content (Flex) | Sidebar (280px) */
+.main-layout {
+    display: grid;
+    grid-template-columns: 220px 1fr 280px;
+    gap: 30px;
+    align-items: start; /* Keeps sidebars from stretching */
+}
+
+/* Use this class for centered pages like Login/Register/Verify */
+.auth-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 80vh;
+}
+
+/* =========================================
+   4. CARDS & GENERAL UI
+   ========================================= */
+.card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow);
+}
+
+h1, h2, h3 {
+    color: var(--secondary);
+    margin-bottom: 10px;
+}
+
+.text-muted {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+hr {
+    border: 0;
+    border-top: 1px solid var(--border);
+    margin: 20px 0;
+}
+
+/* =========================================
+   5. BUTTONS
+   ========================================= */
+.btn {
+    display: inline-block;
+    padding: 8px 16px;
+    border-radius: 4px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    font-size: 0.95rem;
+    transition: all 0.2s;
+}
+
+.btn-primary {
+    background-color: var(--primary);
+    color: white;
+}
+.btn-primary:hover {
+    background-color: var(--primary-dark);
+    color: white;
+}
+
+.btn-login {
+    background: transparent;
+    color: #bdc3c7;
+    margin-right: 10px;
+}
+.btn-login:hover { color: white; }
+
+.btn-register {
+    background-color: var(--primary);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 4px;
+}
+.btn-register:hover { opacity: 0.9; color: white; }
+
+/* =========================================
+   6. FORMS
+   ========================================= */
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: var(--secondary);
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font-size: 1rem;
+    font-family: inherit;
+}
+
+input:focus, textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+}
+
+/* =========================================
+   7. SIDEBARS
+   ========================================= */
+.sidebar-menu .menu-item {
+    display: block;
+    padding: 10px 15px;
+    color: var(--text-main);
+    border-radius: 4px;
+    margin-bottom: 5px;
+}
+
+.sidebar-menu .menu-item:hover {
+    background-color: #e1ecf4;
+    color: var(--primary-dark);
+}
+
+.sidebar-menu .menu-item.active {
+    background-color: #f1f2f3;
+    font-weight: bold;
+    border-left: 3px solid var(--primary);
+}
+
+/* =========================================
+   8. QUESTION FEED (The Heart of the App)
+   ========================================= */
+.feed-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.question-card {
+    display: flex;
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 15px;
+    margin-bottom: 15px;
+    transition: transform 0.2s;
+}
+
+.question-card:hover {
+    border-color: #cbd5e0;
+}
+
+/* Stats Box (Votes/Answers) on the left */
+.stats-container {
+    display: flex;
+    flex-direction: column;
+    min-width: 60px;
+    margin-right: 20px;
+    text-align: center;
+    gap: 10px;
+}
+
+.stat-box {
+    display: flex;
+    flex-direction: column;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.stat-value {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: var(--text-main);
+}
+
+.status-answered {
+    border: 1px solid var(--success);
+    border-radius: 4px;
+    color: var(--success);
+    padding: 2px 0;
+}
+
+.status-answered .stat-value { color: var(--success); }
+
+/* Question Content */
+.question-content { flex-grow: 1; }
+
+.question-title {
+    margin: 0 0 5px 0;
+    font-size: 1.1rem;
+}
+
+.question-title a { color: var(--primary); }
+
+.question-excerpt {
+    font-size: 0.95rem;
+    color: #444;
+    margin-bottom: 10px;
+    /* Limit to 2 lines usually, handled by PHP substr but good to have CSS fallback */
+    overflow: hidden; 
+}
+
+/* Tags */
+.tags-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.tag {
+    background-color: #e1ecf4;
+    color: #39739d;
+    font-size: 0.8rem;
+    padding: 2px 8px;
+    border-radius: 4px;
+    display: inline-block;
+}
+
+.meta-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.user-info {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.author-name {
+    color: var(--primary);
+    font-weight: 500;
+}
+
+/* =========================================
+   9. ROADMAPS (Specific)
+   ========================================= */
+.roadmap-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+}
+
+.roadmap-card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.roadmap-card .btn {
+    margin-top: auto; /* Pushes button to bottom */
+}
+
+/* =========================================
+   10. RESPONSIVE (Mobile)
+   ========================================= */
+@media (max-width: 900px) {
+    /* Collapse the 3-column layout into 1 column */
+    .main-layout {
+        grid-template-columns: 1fr; 
+    }
+
+    /* Move Sidebars: Order 1 = Content, Order 2 = Left Sidebar, Order 3 = Right Sidebar */
+    .content-feed { order: 1; }
+    .sidebar-left { order: 2; }
+    .sidebar-right { order: 3; }
+
+    /* Adjust Sidebar logic for mobile */
+    .sidebar-left, .sidebar-right {
+        margin-top: 20px;
+    }
+}
+
+@media (max-width: 600px) {
+    .navbar {
+        padding: 0 1rem;
+    }
+    
+    .nav-links {
+        display: none; /* Hide middle links on small phones */
+    }
+
+    .question-card {
+        flex-direction: column;
+    }
+
+    .stats-container {
+        flex-direction: row;
+        margin-bottom: 15px;
+        margin-right: 0;
+        justify-content: flex-start;
+        gap: 20px;
+    }
+}
