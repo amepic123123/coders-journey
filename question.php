@@ -1,8 +1,5 @@
 <?php
-// 1. LINK TO BACKEND LOGIC
-// This file will fetch two variables: $question (the main post) and $answers (the list of replies)
 // require 'actions/fetch_single_question.php';
-
 ?>
 
 <!DOCTYPE html>
