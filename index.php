@@ -1,8 +1,5 @@
 <?php 
-// 1. LINK TO BACKEND LOGIC
-// This pulls in the $questions variable from your teammate's file.
-// Make sure his file is exactly at this path:
-require 'actions/fetch_questions.php'; 
+//require 'actions/fetch_questions.php'; 
 ?>
 
 <!DOCTYPE html>
