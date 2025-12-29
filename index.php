@@ -1,5 +1,24 @@
 <?php 
-//require 'actions/fetch_questions.php'; 
+// require 'actions/fetch_questions.php'; 
+
+// --- TEMPORARY MOCK DATA (For testing without DB) ---
+// If you don't have this, the page might crash on count($questions)
+if (!isset($questions)) {
+    $questions = [
+        [
+            'id' => 1,
+            'title' => 'How do I center a div in CSS?',
+            'description' => 'I have tried margin 0 auto but it does not work...',
+            'tags' => 'css, html',
+            'vote_count' => 5,
+            'view_count' => 120,
+            'user_id' => 101,
+            'username' => 'FrontendFan',
+            'created_at' => '2023-10-25 10:00:00'
+        ]
+    ];
+}
+// ----------------------------------------------------
 ?>
 
 <!DOCTYPE html>
@@ -68,9 +87,9 @@
                     <div class="stats-container">
                         <div class="stat-box">
                             <span class="stat-value">
-                                <?php echo $q['vote_count']; //moh you rename this to the variable you set for the upvotes, downvotes num?>
+                                <?php echo $q['vote_count']; //moh you rename this to the variable you set for the upvotes ?>
                             </span>
-                            <span class="stat-label">views</span>
+                            <span class="stat-label">votes</span>
                         </div>
                         <div class="stat-box">
                             <span class="stat-value">0</span>
@@ -93,15 +112,18 @@
                         </p>
                         
                         <div class="meta-footer">
+                            
                             <div class="tags-list">
                                 <?php 
                                     $tags_array = explode(',', $q['tags']); 
                                     foreach($tags_array as $tag):
+                                        $clean_tag = trim($tag); // Clean up spaces
                                 ?>
-                                    <span class="tag"><?php echo trim($tag); ?></span>
+                                    <a href="tag.php?name=<?php echo urlencode($clean_tag); ?>" class="tag">
+                                        <?php echo htmlspecialchars($clean_tag); ?>
+                                    </a>
                                 <?php endforeach; ?>
                             </div>
-                            
                             <div class="user-info">
                                 <span class="text-muted">asked by</span>
                                 <a href="profile.php?id=<?php echo $q['user_id']; ?>" class="author-name">
@@ -116,7 +138,8 @@
 
                 </div>
                 <?php endforeach; ?>
-                <?php else: ?>
+                
+            <?php else: ?>
                 <div class="card" style="text-align:center; padding: 40px;">
                     <h3>No questions found.</h3>
                     <p>Be the first to ask one!</p>
