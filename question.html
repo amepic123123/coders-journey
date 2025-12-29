@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Question - Coders' Journey</title>
+  <link rel="stylesheet" href="assets/css/style.css" />
+
+  <style>
+    .vote-sidebar {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-right: 1.5rem;
+      min-width: 50px;
+    }
+    .vote-btn {
+      background: none;
+      border: 1px solid #ddd;
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      cursor: pointer;
+      color: #666;
+      font-size: 0.8rem;
+    }
+    .vote-count {
+      font-size: 1.2rem;
+      font-weight: bold;
+      margin: 10px 0;
+      color: #2c3e50;
+    }
+    .post-layout {
+      display: flex;
+      align-items: flex-start;
+    }
+    .best-answer {
+      border: 2px solid #27ae60;
+      background-color: #f0fdf4;
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-brand"><a href="index.html">Coders' Journey</a></div>
+    <div class="nav-links">
+      <a href="roadmaps.html">Roadmaps</a>
+      <a href="ask.html">Ask Question</a>
+    </div>
+    <div class="nav-auth" id="nav-auth"></div>
+  </nav>
+
+  <div class="container main-layout">
+    <aside class="sidebar-left">
+      <div class="sidebar-menu">
+        <a href="index.html" class="menu-item">🏠 Home</a>
+        <a href="roadmaps.html" class="menu-item">🗺️ Roadmaps</a>
+        <a href="tags.html" class="menu-item">🏷️ Tags</a>
+      </div>
+    </aside>
+
+    <main class="content-feed">
+      <div class="card" id="question-card" style="display:none;"></div>
+
+      <h3 style="margin: 2rem 0 1rem;"><span id="answers-count">0</span> Answers</h3>
+      <div id="answers-list"></div>
+
+      <div class="card" style="margin-top: 2rem; background: #f9f9f9;" id="answer-form-card">
+        <h3>Your Answer</h3>
+        <form id="answer-form">
+          <div class="form-group">
+            <textarea
+              name="answer_body"
+              rows="6"
+              required
+              placeholder="Type your solution here..."
+              style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;"
+            ></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary">Post Answer</button>
+        </form>
+        <div id="answer-error" style="display:none; margin-top: 10px;"></div>
+      </div>
+
+      <div id="question-error" class="card" style="padding:16px; display:none;"></div>
+    </main>
+
+    <aside class="sidebar-right"></aside>
+  </div>
+
+  <script type="module" src="assets/js/page-question.js"></script>
+</body>
+</html>

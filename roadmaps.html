@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Learning Roadmaps - Coders' Journey</title>
+  <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-brand"><a href="index.html">Coders' Journey</a></div>
+    <div class="nav-links">
+      <a href="roadmaps.html" class="active">Roadmaps</a>
+      <a href="ask.html">Ask Question</a>
+    </div>
+    <div class="nav-auth" id="nav-auth"></div>
+  </nav>
+
+  <div class="container main-layout">
+    <aside class="sidebar-left">
+      <div class="sidebar-menu">
+        <a href="index.html" class="menu-item">🏠 Home</a>
+        <a href="roadmaps.html" class="menu-item active">🗺️ Roadmaps</a>
+        <a href="tags.html" class="menu-item">🏷️ Tags</a>
+      </div>
+    </aside>
+
+    <main class="content-feed">
+      <div class="feed-header">
+        <h2>Explore Learning Paths</h2>
+        <p class="text-muted">Follow step-by-step guides created by the community.</p>
+      </div>
+
+      <div class="card" style="margin-bottom: 20px;">
+        <h3 style="margin-bottom: 8px;">Generate a Roadmap</h3>
+        <p class="text-muted" style="margin-bottom: 12px;">Describe what you want to learn, and we’ll create a step-by-step plan.</p>
+
+        <div id="gen-error" style="display:none; background: #f8d7da; color: #721c24; padding: 10px; border-radius: 4px; margin-bottom: 12px;"></div>
+
+        <form id="gen-form" style="display:flex; gap: 10px; align-items: center;">
+          <input id="gen-goal" name="goal" type="text" placeholder="e.g., become a frontend developer" style="flex: 1;" required />
+          <button id="gen-btn" type="submit" class="btn btn-primary" style="white-space: nowrap;">Generate</button>
+        </form>
+      </div>
+
+      <div class="roadmap-grid" id="roadmaps-grid"></div>
+      <div id="roadmaps-empty" class="card" style="text-align:center; padding: 40px; display:none;">
+        <h3>No roadmaps found.</h3>
+      </div>
+    </main>
+
+    <aside class="sidebar-right"></aside>
+  </div>
+
+  <script type="module" src="assets/js/page-roadmaps.js"></script>
+</body>
+</html>

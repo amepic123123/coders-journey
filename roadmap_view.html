@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Roadmap - Coders' Journey</title>
+  <link rel="stylesheet" href="assets/css/style.css" />
+
+  <style>
+    /* Progress Bar Styles */
+    .progress-container {
+      background: #e1e4e8;
+      border-radius: 8px;
+      height: 20px;
+      width: 100%;
+      margin: 20px 0;
+      overflow: hidden;
+    }
+    .progress-bar {
+      background: #27ae60;
+      height: 100%;
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+    .progress-text {
+      text-align: right;
+      font-size: 0.9rem;
+      color: #666;
+      margin-bottom: 5px;
+    }
+
+    /* Timeline Step Styles */
+    .step-list {
+      list-style: none;
+      padding: 0;
+      position: relative;
+    }
+    /* The vertical line */
+    .step-list::before {
+      content: '';
+      position: absolute;
+      left: 20px;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: #e1e4e8;
+      z-index: 0;
+    }
+    .step-item {
+      display: flex;
+      align-items: flex-start;
+      margin-bottom: 2rem;
+      position: relative;
+      z-index: 1;
+    }
+    .step-checkbox {
+      width: 40px;
+      height: 40px;
+      margin-right: 15px;
+      cursor: pointer;
+      z-index: 2;
+    }
+    input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      margin-top: 5px;
+      cursor: pointer;
+    }
+    .step-content {
+      background: white;
+      padding: 1.5rem;
+      border: 1px solid #e1e4e8;
+      border-radius: 8px;
+      flex-grow: 1;
+    }
+    .step-title {
+      margin: 0 0 5px 0;
+      font-size: 1.1rem;
+    }
+    .step-desc {
+      color: #666;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-brand"><a href="index.html">Coders' Journey</a></div>
+    <div class="nav-links">
+      <a href="roadmaps.html" class="active">Roadmaps</a>
+      <a href="ask.html">Ask Question</a>
+    </div>
+    <div class="nav-auth" id="nav-auth"></div>
+  </nav>
+
+  <div class="container main-layout">
+    <aside class="sidebar-left">
+      <div class="sidebar-menu">
+        <a href="index.html" class="menu-item">🏠 Home</a>
+        <a href="roadmaps.html" class="menu-item active">🗺️ Roadmaps</a>
+        <a href="tags.html" class="menu-item">🏷️ Tags</a>
+      </div>
+
+      <div class="card" style="margin-top: 20px;">
+        <h3>Author</h3>
+        <p id="roadmap-author" class="text-muted">—</p>
+      </div>
+    </aside>
+
+    <main class="content-feed">
+      <div class="card" id="roadmap-card">
+        <h1 id="roadmap-title">Roadmap</h1>
+        <p id="roadmap-description" style="color: #555; margin-top: 10px;"></p>
+
+        <div style="margin-top: 30px;">
+          <div class="progress-text">
+            <span id="percent-display">0</span>% Complete
+          </div>
+          <div class="progress-container">
+            <div class="progress-bar" id="main-progress-bar"></div>
+          </div>
+        </div>
+      </div>
+
+      <h3 style="margin: 30px 0 20px;">Your Journey</h3>
+      <ul class="step-list" id="steps-list"></ul>
+
+      <div id="roadmap-error" class="card" style="padding:16px; display:none;"></div>
+    </main>
+
+    <aside class="sidebar-right"></aside>
+  </div>
+
+  <script type="module" src="assets/js/page-roadmap-view.js"></script>
+</body>
+</html>

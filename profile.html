@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Profile - Coders' Journey</title>
+  <link rel="stylesheet" href="assets/css/style.css" />
+
+  <style>
+    .profile-header {
+      background: white;
+      border: 1px solid #e1e4e8;
+      border-radius: 8px;
+      padding: 2rem;
+      display: flex;
+      align-items: center;
+      margin-bottom: 2rem;
+    }
+    .profile-avatar {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3rem;
+      color: white;
+      font-weight: bold;
+      margin-right: 2rem;
+    }
+    .profile-stats {
+      display: flex;
+      gap: 2rem;
+      margin-top: 1rem;
+    }
+    .stat-item {
+      text-align: center;
+    }
+    .stat-val { font-size: 1.2rem; font-weight: bold; display: block; }
+    .stat-label { font-size: 0.9rem; color: #666; }
+
+    .mini-progress {
+      background: #eee;
+      height: 6px;
+      border-radius: 3px;
+      width: 100px;
+      margin-top: 5px;
+      overflow: hidden;
+    }
+    .mini-fill {
+      background: #27ae60;
+      height: 100%;
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-brand"><a href="index.html">Coders' Journey</a></div>
+    <div class="nav-links">
+      <a href="roadmaps.html">Roadmaps</a>
+      <a href="ask.html">Ask Question</a>
+    </div>
+    <div class="nav-auth" id="nav-auth"></div>
+  </nav>
+
+  <div class="container main-layout">
+    <aside class="sidebar-left">
+      <div class="sidebar-menu">
+        <a href="index.html" class="menu-item">🏠 Home</a>
+        <a href="roadmaps.html" class="menu-item">🗺️ Roadmaps</a>
+        <a href="profile.html" class="menu-item active">👤 My Profile</a>
+      </div>
+    </aside>
+
+    <main class="content-feed">
+      <div class="profile-header">
+        <div class="profile-avatar" id="profile-avatar" style="background-color:#f1c40f;">U</div>
+
+        <div style="flex-grow: 1;">
+          <h1 style="margin: 0;">
+            <span id="profile-username">User</span>
+            <span id="profile-verified" title="Verified" style="font-size: 1rem; vertical-align: middle; display:none;">✅</span>
+          </h1>
+          <p style="color: #666; margin: 5px 0;">Member since <span id="profile-joined">—</span></p>
+
+          <div class="profile-stats">
+            <div class="stat-item">
+              <span class="stat-val" id="profile-reputation">0</span>
+              <span class="stat-label">Reputation</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-val" id="profile-questions-count">0</span>
+              <span class="stat-label">Questions</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-val" id="profile-roadmaps-count">0</span>
+              <span class="stat-label">Roadmaps</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom: 2rem;">
+        <h3>📚 In Progress Roadmaps</h3>
+        <div id="profile-roadmaps"></div>
+      </div>
+
+      <div class="card">
+        <h3>📝 Recent Questions</h3>
+        <div id="profile-questions"></div>
+      </div>
+
+      <div id="profile-error" class="card" style="padding:16px; display:none;"></div>
+    </main>
+
+    <aside class="sidebar-right"></aside>
+  </div>
+
+  <script type="module" src="assets/js/page-profile.js"></script>
+</body>
+</html>
