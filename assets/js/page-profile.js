@@ -15,6 +15,43 @@ const roadmapsEl = document.getElementById("profile-roadmaps");
 const questionsEl = document.getElementById("profile-questions");
 const errorEl = document.getElementById("profile-error");
 
+const avatarForm = document.getElementById("avatar-form");
+const avatarFile = document.getElementById("avatar-file");
+const avatarStatus = document.getElementById("avatar-status");
+
+function showAvatarStatus(msg) {
+  if (!avatarStatus) return;
+  avatarStatus.style.display = "inline";
+  avatarStatus.textContent = msg;
+}
+
+function buildAvatarUrl(avatarPath) {
+  if (!avatarPath) return "";
+  const p = String(avatarPath).replace(/^\/+/, "");
+  // Use API_BASE host (Apache) even if page is on Live Server.
+  return `${window.location.origin}`.includes(":5500")
+    ? `${new URL("/webProjectBackend/", window.location.origin.replace(":5500", "")).toString().replace(/\/$/, "")}/${p}`
+    : `${new URL("/webProjectBackend/", window.location.origin).toString().replace(/\/$/, "")}/${p}`;
+}
+
+function renderAvatar(user) {
+  const username = user?.username ?? "User";
+  const avatarColor = user?.avatar_color ?? "#f1c40f";
+  const avatarPath = user?.avatar_path ?? "";
+  const avatarUrl = buildAvatarUrl(avatarPath);
+
+  if (avatarUrl) {
+    avatarEl.style.backgroundColor = "transparent";
+    avatarEl.textContent = "";
+    avatarEl.innerHTML = `<img src="${avatarUrl}" alt="${escapeHtml(username)}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;" />`;
+    return;
+  }
+
+  avatarEl.innerHTML = "";
+  avatarEl.style.backgroundColor = avatarColor;
+  avatarEl.textContent = String(username).slice(0, 1).toUpperCase();
+}
+
 function setError(msg) {
   errorEl.style.display = "block";
   errorEl.textContent = msg;
@@ -100,8 +137,7 @@ function renderQuestions(list) {
 
     document.title = `${username}'s Profile`;
 
-    avatarEl.style.backgroundColor = avatarColor;
-    avatarEl.textContent = String(username).slice(0, 1).toUpperCase();
+    renderAvatar(user);
 
     usernameEl.textContent = username;
     verifiedEl.style.display = role === "verified" ? "inline" : "none";
@@ -114,6 +150,41 @@ function renderQuestions(list) {
 
     roadmapsEl.innerHTML = renderRoadmaps(myRoadmaps);
     questionsEl.innerHTML = renderQuestions(myQuestions);
+
+    // Upload avatar (only for your own profile)
+    if (avatarForm && !id) {
+      avatarForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        errorEl.style.display = "none";
+
+        const f = avatarFile?.files?.[0];
+        if (!f) {
+          showAvatarStatus("Choose an image first.");
+          return;
+        }
+
+        showAvatarStatus("Uploading...");
+        const fd = new FormData();
+        fd.append("image", f);
+
+        try {
+          const res = await apiFetch("/actions/upload_profile_image.php", {
+            method: "POST",
+            body: fd,
+          });
+
+          const newPath = res?.avatar_path;
+          renderAvatar({ ...user, avatar_path: newPath });
+          showAvatarStatus("Uploaded.");
+
+          // Refresh navbar avatar
+          await renderNavAuth();
+        } catch (err) {
+          showAvatarStatus("");
+          setError(err.message);
+        }
+      });
+    }
   } catch (e) {
     setError(`Backend not connected yet: ${e.message}`);
   }

@@ -101,6 +101,16 @@
       </div>
 
       <div class="card" style="margin-bottom: 2rem;">
+        <h3>🖼️ Profile Image</h3>
+        <form id="avatar-form" style="display:flex; gap:12px; align-items:center; flex-wrap: wrap; margin-top: 10px;">
+          <input id="avatar-file" name="image" type="file" accept="image/png,image/jpeg,image/webp" />
+          <button class="btn btn-primary" type="submit">Upload</button>
+          <span id="avatar-status" class="text-muted" style="display:none;"></span>
+        </form>
+        <p class="text-muted" style="margin-top:8px;">PNG/JPG/WEBP, max 2MB.</p>
+      </div>
+
+      <div class="card" style="margin-bottom: 2rem;">
         <h3>📚 In Progress Roadmaps</h3>
         <div id="profile-roadmaps"></div>
       </div>
