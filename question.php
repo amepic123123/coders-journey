@@ -1,5 +1,41 @@
 <?php
 // require 'actions/fetch_single_question.php';
+
+// --- TEMPORARY MOCK DATA (For testing without DB) ---
+if (!isset($question)) {
+    $question = [
+        'id' => 1,
+        'title' => 'How do I center a div in CSS?',
+        'description' => 'I have tried using margin: 0 auto but it does not work. My container is flex but nothing moves.',
+        'tags' => 'css, html, flexbox',
+        'vote_count' => 12,
+        'user_id' => 101, 
+        'username' => 'FrontendFan',
+        'created_at' => '2023-10-25 10:00:00'
+    ];
+}
+
+if (!isset($answers)) {
+    $answers = [
+        [
+            'id' => 5,
+            'body' => 'You need to set justify-content: center on the parent container.',
+            'username' => 'CSS_Wizard',
+            'user_id' => 202, // Different user than the asker
+            'is_best' => true, 
+            'created_at' => '2023-10-25 12:30:00'
+        ],
+        [
+            'id' => 6,
+            'body' => 'Make sure the parent has a width defined, otherwise it cannot center anything.',
+            'username' => 'DevHelper',
+            'user_id' => 303,
+            'is_best' => false,
+            'created_at' => '2023-10-25 13:00:00'
+        ]
+    ];
+}
+// ----------------------------
 ?>
 
 <!DOCTYPE html>
@@ -72,6 +108,7 @@
             <div class="sidebar-menu">
                 <a href="index.php" class="menu-item">🏠 Home</a>
                 <a href="roadmaps.php" class="menu-item">🗺️ Roadmaps</a>
+                <a href="tags.php" class="menu-item">🏷️ Tags</a>
             </div>
         </aside>
 
@@ -95,18 +132,22 @@
                         </div>
 
                         <div class="meta-footer">
+                            
                             <div class="tags-list">
                                 <?php 
                                     $tags = explode(',', $question['tags']);
                                     foreach($tags as $t): 
+                                        $clean_t = trim($t);
                                 ?>
-                                    <span class="tag"><?php echo trim($t); ?></span>
+                                    <a href="tag.php?name=<?php echo urlencode($clean_t); ?>" class="tag">
+                                        <?php echo htmlspecialchars($clean_t); ?>
+                                    </a>
                                 <?php endforeach; ?>
                             </div>
                             
                             <div class="user-info">
                                 <span class="text-muted">asked by</span>
-                                <a href="profile.php?id=<?php echo $q['user_id']; ?>">
+                                <a href="profile.php?id=<?php echo $question['user_id']; ?>">
                                     <strong style="color: #4a90e2;"><?php echo htmlspecialchars($question['username']); ?></strong>
                                 </a>
                                 <span class="text-muted">on <?php echo date('M d', strtotime($question['created_at'])); ?></span>
@@ -144,7 +185,7 @@
                             <div class="meta-footer" style="justify-content: flex-end;">
                                 <div class="user-info">
                                     <span class="text-muted">answered by</span>
-                                    <a href="profile.php?id=<?php echo $q['user_id']; ?>">
+                                    <a href="profile.php?id=<?php echo $ans['user_id']; ?>">
                                         <strong><?php echo htmlspecialchars($ans['username']); ?></strong>
                                     </a>
                                     <span class="text-muted"><?php echo date('M d', strtotime($ans['created_at'])); ?></span>
@@ -177,7 +218,7 @@
         </main>
 
         <aside class="sidebar-right">
-        </aside>
+             </aside>
 
     </div>
 

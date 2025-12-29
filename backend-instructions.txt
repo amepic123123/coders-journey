@@ -9,7 +9,7 @@ design them.
 YOUR JOB:
 1. Create the Database.
 2. Connect the Database (`config/db.php`).
-3. Create the Logic Files in the `/actions` folder.
+3. Create the Logic Files in the `/actions` folder (Code provided below).
 4. Go into my .php files, DELETE the "Mock Data" blocks, and LINK your logic.
 
 ------------------------------------------------------------------------------
@@ -122,58 +122,240 @@ try {
 ------------------------------------------------------------------------------
 STEP 4: ACTION FILES YOU NEED TO CREATE (In /actions folder)
 ------------------------------------------------------------------------------
+Copy the code blocks below into the corresponding files in the `/actions` folder.
 
-1. actions/register_logic.php
-   - INPUTS: $_POST['username'], $_POST['email'], $_POST['password']
-   - LOGIC:
-     * Check if email exists.
-     * Hash password using `password_hash()`.
-     * Generate 6-digit OTP.
-     * Insert into `users`.
-     * Send email (optional) or just display code for testing.
-     * Redirect: `header("Location: ../verify.php?email=$email");`
+1. Create file: `actions/register_logic.php`
+<?php
+session_start();
+require '../config/db.php';
 
-2. actions/verify_logic.php
-   - INPUTS: $_POST['email'], $_POST['otp_code']
-   - LOGIC:
-     * Check if code matches DB.
-     * If yes: Update `is_email_verified = 1`, set `$_SESSION['user_id']`.
-     * Redirect: `header("Location: ../index.php");`
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $username = trim($_POST['username']);
+    $email = trim($_POST['email']);
+    $password = $_POST['password'];
 
-3. actions/login_logic.php
-   - INPUTS: $_POST['email'], $_POST['password']
-   - LOGIC:
-     * Fetch user.
-     * Verify hash: `password_verify()`.
-     * Set `$_SESSION['user_id']` and `$_SESSION['username']`.
-     * Redirect: `header("Location: ../index.php");`
+    // Check if user exists
+    $stmt = $pdo->prepare("SELECT id FROM users WHERE email = ? OR username = ?");
+    $stmt->execute([$email, $username]);
+    if ($stmt->rowCount() > 0) {
+        header("Location: ../register.php?error=email_taken");
+        exit();
+    }
 
-4. actions/ask_logic.php
-   - INPUTS: $_POST['q_title'], $_POST['q_desc'], $_POST['q_tags']
-   - LOGIC: Insert into `questions`. Redirect to `index.php`.
+    // Hash password & Generate OTP
+    $hashedPwd = password_hash($password, PASSWORD_DEFAULT);
+    $otp = rand(100000, 999999);
 
-5. actions/fetch_questions.php  (USED IN index.php)
-   - LOGIC: Query `SELECT * FROM questions ORDER BY created_at DESC`.
-   - OUTPUT: Create a variable named `$questions` (Array of arrays).
-   - NOTE: This file is NOT a redirect. It is `required` at the top of index.php.
+    try {
+        $stmt = $pdo->prepare("INSERT INTO users (username, email, password, verification_code) VALUES (?, ?, ?, ?)");
+        $stmt->execute([$username, $email, $hashedPwd, $otp]);
+        // Send email here in production
+        header("Location: ../verify.php?email=" . urlencode($email));
+        exit();
+    } catch (PDOException $e) {
+        header("Location: ../register.php?error=sql_error");
+        exit();
+    }
+}
+?>
 
-6. actions/fetch_single_question.php (USED IN question.php)
-   - INPUT: `$_GET['id']`
-   - OUTPUT:
-     * Variable `$question` (Single row).
-     * Variable `$answers` (Array of rows).
+2. Create file: `actions/verify_logic.php`
+<?php
+session_start();
+require '../config/db.php';
 
-7. actions/post_answer.php
-   - INPUTS: $_POST['question_id'], $_POST['answer_body']
-   - LOGIC: Insert into `answers`. Redirect back to `../question.php?id=$id`.
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $email = $_POST['email'];
+    $otp = $_POST['otp_code'];
 
-8. actions/fetch_roadmaps.php (USED IN roadmaps.php)
-   - OUTPUT: Variable `$roadmaps`.
+    $stmt = $pdo->prepare("SELECT * FROM users WHERE email = ?");
+    $stmt->execute([$email]);
+    $user = $stmt->fetch();
 
-9. actions/fetch_roadmap_details.php (USED IN roadmap_view.php)
-   - INPUT: `$_GET['id']`
-   - OUTPUT: Variable `$roadmap` and `$steps`.
-   - IMPORTANT: You must LEFT JOIN `user_roadmap_progress` to see if a step is checked.
+    if ($user && $user['verification_code'] == $otp) {
+        $update = $pdo->prepare("UPDATE users SET is_email_verified = 1, verification_code = NULL WHERE id = ?");
+        $update->execute([$user['id']]);
+
+        $_SESSION['user_id'] = $user['id'];
+        $_SESSION['username'] = $user['username'];
+        
+        header("Location: ../index.php?success=verified");
+        exit();
+    } else {
+        header("Location: ../verify.php?email=$email&error=wrong_code");
+        exit();
+    }
+}
+?>
+
+3. Create file: `actions/login_logic.php`
+<?php
+session_start();
+require '../config/db.php';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $email = $_POST['email'];
+    $password = $_POST['password'];
+
+    $stmt = $pdo->prepare("SELECT * FROM users WHERE email = ?");
+    $stmt->execute([$email]);
+    $user = $stmt->fetch();
+
+    if ($user && password_verify($password, $user['password'])) {
+        $_SESSION['user_id'] = $user['id'];
+        $_SESSION['username'] = $user['username'];
+        $_SESSION['is_verified'] = $user['role'] === 'verified'; 
+        header("Location: ../index.php");
+        exit();
+    } else {
+        header("Location: ../login.php?error=wrong_login");
+        exit();
+    }
+}
+?>
+
+4. Create file: `actions/ask_logic.php`
+<?php
+session_start();
+require '../config/db.php';
+
+if (!isset($_SESSION['user_id'])) {
+    header("Location: ../login.php");
+    exit();
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $title = trim($_POST['q_title']);
+    $desc = trim($_POST['q_desc']);
+    $tags = trim($_POST['q_tags']);
+    $user_id = $_SESSION['user_id'];
+
+    if (!empty($title) && !empty($desc)) {
+        $stmt = $pdo->prepare("INSERT INTO questions (user_id, title, description, tags) VALUES (?, ?, ?, ?)");
+        $stmt->execute([$user_id, $title, $desc, $tags]);
+        header("Location: ../index.php?success=posted");
+        exit();
+    } else {
+        header("Location: ../ask.php?error=empty_fields");
+        exit();
+    }
+}
+?>
+
+5. Create file: `actions/fetch_questions.php`
+<?php
+require_once __DIR__ . '/../config/db.php';
+
+$stmt = $pdo->query("
+    SELECT q.*, u.username, u.role 
+    FROM questions q 
+    JOIN users u ON q.user_id = u.id 
+    ORDER BY q.created_at DESC
+");
+$questions = $stmt->fetchAll(PDO::FETCH_ASSOC);
+?>
+
+6. Create file: `actions/fetch_single_question.php`
+<?php
+require_once __DIR__ . '/../config/db.php';
+
+$question_id = isset($_GET['id']) ? $_GET['id'] : 0;
+
+// Fetch Question
+$stmt = $pdo->prepare("SELECT q.*, u.username, u.role FROM questions q JOIN users u ON q.user_id = u.id WHERE q.id = ?");
+$stmt->execute([$question_id]);
+$question = $stmt->fetch(PDO::FETCH_ASSOC);
+
+// Fetch Answers
+$stmt = $pdo->prepare("SELECT a.*, u.username, u.role FROM answers a JOIN users u ON a.user_id = u.id WHERE a.question_id = ? ORDER BY a.is_best DESC, a.created_at ASC");
+$stmt->execute([$question_id]);
+$answers = $stmt->fetchAll(PDO::FETCH_ASSOC);
+?>
+
+7. Create file: `actions/post_answer.php`
+<?php
+session_start();
+require '../config/db.php';
+
+if (!isset($_SESSION['user_id'])) {
+    header("Location: ../login.php");
+    exit();
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $question_id = $_POST['question_id'];
+    $body = trim($_POST['answer_body']);
+    $user_id = $_SESSION['user_id'];
+
+    if (!empty($body)) {
+        $stmt = $pdo->prepare("INSERT INTO answers (question_id, user_id, body) VALUES (?, ?, ?)");
+        $stmt->execute([$question_id, $user_id, $body]);
+    }
+    header("Location: ../question.php?id=" . $question_id);
+    exit();
+}
+?>
+
+8. Create file: `actions/fetch_roadmaps.php`
+<?php
+require_once __DIR__ . '/../config/db.php';
+
+$stmt = $pdo->query("
+    SELECT r.*, u.username as creator_name, u.role,
+    (SELECT COUNT(*) FROM roadmap_steps WHERE roadmap_id = r.id) as steps_count
+    FROM roadmaps r 
+    JOIN users u ON r.creator_id = u.id 
+    ORDER BY r.created_at DESC
+");
+$roadmaps = $stmt->fetchAll(PDO::FETCH_ASSOC);
+?>
+
+9. Create file: `actions/fetch_roadmap_details.php`
+<?php
+require_once __DIR__ . '/../config/db.php';
+
+$roadmap_id = isset($_GET['id']) ? $_GET['id'] : 0;
+$user_id = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : 0;
+
+// Get Roadmap Info
+$stmt = $pdo->prepare("SELECT r.*, u.username as creator_name FROM roadmaps r JOIN users u ON r.creator_id = u.id WHERE r.id = ?");
+$stmt->execute([$roadmap_id]);
+$roadmap = $stmt->fetch(PDO::FETCH_ASSOC);
+
+// Get Steps with User Progress (LEFT JOIN)
+$sql = "
+    SELECT s.*, IF(p.is_completed, 1, 0) as is_completed
+    FROM roadmap_steps s
+    LEFT JOIN user_roadmap_progress p ON s.id = p.step_id AND p.user_id = ?
+    WHERE s.roadmap_id = ?
+    ORDER BY s.step_order ASC
+";
+$stmt = $pdo->prepare($sql);
+$stmt->execute([$user_id, $roadmap_id]);
+$steps = $stmt->fetchAll(PDO::FETCH_ASSOC);
+?>
+
+10. Create file: `actions/fetch_profile.php`
+<?php
+require_once __DIR__ . '/../config/db.php';
+$profile_id = isset($_GET['id']) ? $_GET['id'] : (isset($_SESSION['user_id']) ? $_SESSION['user_id'] : 0);
+
+if ($profile_id == 0) { header("Location: login.php"); exit(); }
+
+// User Info
+$stmt = $pdo->prepare("SELECT id, username, email, role, reputation, created_at as joined_date FROM users WHERE id = ?");
+$stmt->execute([$profile_id]);
+$user = $stmt->fetch(PDO::FETCH_ASSOC);
+$user['avatar_color'] = '#f1c40f'; // Default color
+
+// User's Questions
+$stmt = $pdo->prepare("SELECT * FROM questions WHERE user_id = ? ORDER BY created_at DESC LIMIT 5");
+$stmt->execute([$profile_id]);
+$my_questions = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Empty array for roadmaps for now (complex join needed)
+$my_roadmaps = [];
+?>
 
 ------------------------------------------------------------------------------
 STEP 5: INTEGRATION
@@ -181,22 +363,19 @@ STEP 5: INTEGRATION
 Once you create the logic files above:
 1. Open my Frontend files (e.g., `index.php`).
 2. DELETE the "Temporary Mock Data" block at the top.
-3. Uncomment the line: `require 'actions/fetch_questions.php';`
-
-خليت عمك gemini يسوي الفايل هاض كامل عشانه معي بالشغل أول بأول
+3. Uncomment the line: `require 'actions/fetch_questions.php';` (or relevant file).
 
 ------------------------------------------------------------------------------
 NEW FEATURE: TAGS SYSTEM (tags.php & tag.php)
 ------------------------------------------------------------------------------
 
 1. DATABASE UPDATE
-   To support the "Big Tag" vs "Sub Tag" layout, we need a new table.
-   Run this SQL:
+   Run this SQL to create the tags table:
 
    CREATE TABLE tag_definitions (
        id INT AUTO_INCREMENT PRIMARY KEY,
-       main_tag VARCHAR(50) NOT NULL,      -- e.g. "Python"
-       sub_tags TEXT,                      -- e.g. "Django, Flask, Pandas" (Comma separated)
+       main_tag VARCHAR(50) NOT NULL,
+       sub_tags TEXT,
        description VARCHAR(255),
        question_count INT DEFAULT 0
    );
@@ -206,21 +385,39 @@ NEW FEATURE: TAGS SYSTEM (tags.php & tag.php)
    ('JavaScript', 'React,Vue,Node,ES6', 'Language of the web.'),
    ('Java', 'Spring,Android,OOP', 'Object-oriented language for enterprise.');
 
-2. CREATE: actions/fetch_all_tags.php
-   - Query: SELECT * FROM tag_definitions
-   - Output: Variable $tag_groups
+2. Create file: `actions/fetch_all_tags.php`
+<?php
+require_once __DIR__ . '/../config/db.php';
 
-3. CREATE: actions/fetch_questions_by_tag.php
-   - Input: $_GET['name'] (e.g. "Django")
-   - Logic: 
-     The 'tags' column in 'questions' table stores strings like "python,django".
-     You need to search inside that string.
-     
-     SQL: SELECT q.*, u.username 
-          FROM questions q
-          JOIN users u ON q.user_id = u.id
-          WHERE q.tags LIKE :tag_search
-     
-     (Note: bind :tag_search as "%" . $tag_name . "%")
-     
-   - Output: Variable $questions
+$stmt = $pdo->query("SELECT * FROM tag_definitions");
+$tag_groups = [];
+while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+    $row['sub_tags'] = explode(',', $row['sub_tags']);
+    $tag_groups[] = $row;
+}
+?>
+
+3. Create file: `actions/fetch_questions_by_tag.php`
+<?php
+require_once __DIR__ . '/../config/db.php';
+
+$tag_name = isset($_GET['name']) ? $_GET['name'] : '';
+
+$stmt = $pdo->prepare("
+    SELECT q.*, u.username, u.role 
+    FROM questions q 
+    JOIN users u ON q.user_id = u.id 
+    WHERE q.tags LIKE ?
+    ORDER BY q.created_at DESC
+");
+$stmt->execute(['%' . $tag_name . '%']);
+$questions = $stmt->fetchAll(PDO::FETCH_ASSOC);
+?>
+
+
+
+
+اسمع اكتشفت انه جيميناي سوا الكود كامل مع اني قايلله
+يسوي بس التعليمات اللي انت تسويها 
+ما عليك غير انك تسوي الفايلز وتسوي كوبي بيست للكود وتربط بالداتابيس  وخلص هيك الابليكيشن المفروض انه شغال
+goddamn
