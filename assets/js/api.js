@@ -17,12 +17,16 @@ function resolveApiBase() {
     return `${origin}/webProjectBackend`;
   }
 
-  // Production (no api subdomain yet): recommended split is
+  // Production (recommended split):
   // - frontend: https://www.codersjourney.space (GitHub Pages)
-  // - backend:  https://codersjourney.space (Cloudflare Tunnel)
-  // This keeps cookies on the same parent domain and avoids needing api.*.
-  if (host === "www.codersjourney.space") {
-    return "https://codersjourney.space/webProjectBackend";
+  // - backend:  https://api.codersjourney.space (Linux home server via Cloudflare Tunnel)
+  if (host === "www.codersjourney.space" || host === "codersjourney.space") {
+    return "https://api.codersjourney.space";
+  }
+
+  // If you open the backend subdomain directly, keep it same-origin.
+  if (host === "api.codersjourney.space") {
+    return origin;
   }
 
   // If you're serving both frontend + backend from the same host, keep it same-origin.
